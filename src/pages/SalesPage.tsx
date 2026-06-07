@@ -3,9 +3,10 @@ import { useSales } from '../context/SalesContext';
 import { useCustomers } from '../context/CustomerContext';
 import { useProducts } from '../context/ProductContext';
 import { useStock } from '../context/StockContext';
+import { InvoicePrintModal } from '../components/InvoicePrintModal';
 import {
   ShoppingCart, Plus, Trash2, Search, Loader2, AlertCircle,
-  RefreshCw, FileText, X, Eye,
+  RefreshCw, FileText, X, Eye, Printer, Download,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -67,7 +68,7 @@ export function SalesPage() {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
-  const [viewInvoice, setViewInvoice] = useState<string | null>(null);
+  const [printInvoiceId, setPrintInvoiceId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   // Form state
@@ -134,7 +135,6 @@ export function SalesPage() {
     setLines(prev => {
       const next = [...prev];
       next[idx] = { ...next[idx], [field]: value };
-      // Auto-fill rate from product's sale_rate
       if (field === 'product_id' && value) {
         next[idx].rate = String(productMap[value]?.sale_rate ?? '');
       }
@@ -192,7 +192,9 @@ export function SalesPage() {
     }
   };
 
-  const viewedInvoice = viewInvoice ? invoices.find(i => i.id === viewInvoice) : null;
+  // Print modal data
+  const printInvoice = printInvoiceId ? invoices.find(i => i.id === printInvoiceId) ?? null : null;
+  const printCustomer = printInvoice ? customers.find(c => c.id === printInvoice.customer_id) ?? null : null;
 
   if (loading) {
     return (
@@ -324,20 +326,41 @@ export function SalesPage() {
                       </span>
                     </td>
                     <td className="px-4 py-4">
-                      <div className="flex gap-2 justify-center">
+                      <div className="flex gap-1 justify-center flex-wrap">
+                        {/* View Invoice */}
                         <button
-                          onClick={() => setViewInvoice(inv.id)}
-                          className="p-2 hover:bg-blue-50 rounded-lg text-blue-600 transition"
-                          title="View details"
+                          onClick={() => setPrintInvoiceId(inv.id)}
+                          title="View Invoice"
+                          className="p-1.5 hover:bg-blue-50 rounded-lg text-blue-600 transition flex items-center gap-1 text-xs"
                         >
-                          <Eye size={16} />
+                          <Eye size={14} />
+                          <span className="hidden sm:inline">View</span>
                         </button>
+                        {/* Print Invoice */}
+                        <button
+                          onClick={() => setPrintInvoiceId(inv.id)}
+                          title="Print Invoice"
+                          className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-600 transition flex items-center gap-1 text-xs"
+                        >
+                          <Printer size={14} />
+                          <span className="hidden sm:inline">Print</span>
+                        </button>
+                        {/* Download PDF */}
+                        <button
+                          onClick={() => setPrintInvoiceId(inv.id)}
+                          title="Download PDF"
+                          className="p-1.5 hover:bg-green-50 rounded-lg text-green-600 transition flex items-center gap-1 text-xs"
+                        >
+                          <Download size={14} />
+                          <span className="hidden sm:inline">PDF</span>
+                        </button>
+                        {/* Delete */}
                         <button
                           onClick={() => handleDelete(inv)}
-                          className="p-2 hover:bg-red-50 rounded-lg text-red-500 transition"
-                          title="Delete invoice"
+                          title="Delete Invoice"
+                          className="p-1.5 hover:bg-red-50 rounded-lg text-red-500 transition"
                         >
-                          <Trash2 size={16} />
+                          <Trash2 size={14} />
                         </button>
                       </div>
                     </td>
@@ -361,7 +384,6 @@ export function SalesPage() {
       {showModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl my-6">
-            {/* Modal Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
               <h2 className="text-xl font-bold text-gray-900">🧾 New Sales Invoice</h2>
               <button onClick={() => setShowModal(false)} className="p-2 hover:bg-gray-100 rounded-lg">
@@ -447,8 +469,7 @@ export function SalesPage() {
                             </td>
                             <td className="px-3 py-2">
                               <input
-                                type="number"
-                                min="1"
+                                type="number" min="1"
                                 value={line.quantity}
                                 onChange={e => updateLine(idx, 'quantity', e.target.value)}
                                 className="w-full border border-gray-200 rounded px-2 py-1 text-sm text-right focus:outline-none focus:ring-1 focus:ring-blue-400"
@@ -457,9 +478,7 @@ export function SalesPage() {
                             </td>
                             <td className="px-3 py-2">
                               <input
-                                type="number"
-                                min="0"
-                                step="0.01"
+                                type="number" min="0" step="0.01"
                                 value={line.rate}
                                 onChange={e => updateLine(idx, 'rate', e.target.value)}
                                 className="w-full border border-gray-200 rounded px-2 py-1 text-sm text-right focus:outline-none focus:ring-1 focus:ring-blue-400"
@@ -504,10 +523,7 @@ export function SalesPage() {
                   <div className="flex justify-between text-sm items-center">
                     <span className="text-gray-600">Amount Paid (₹)</span>
                     <input
-                      type="number"
-                      min="0"
-                      max={totalAmount}
-                      step="0.01"
+                      type="number" min="0" max={totalAmount} step="0.01"
                       value={paidAmount}
                       onChange={e => setPaidAmount(e.target.value)}
                       className="w-32 border border-gray-300 rounded px-2 py-1 text-sm text-right focus:outline-none focus:ring-1 focus:ring-blue-400"
@@ -522,14 +538,12 @@ export function SalesPage() {
                 </div>
               </div>
 
-              {/* Info */}
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs text-blue-700 flex items-center gap-2">
                 <ShoppingCart size={14} className="shrink-0" />
                 Saving will create <strong>Stock OUT</strong> transactions for each item and update customer outstanding balance.
               </div>
             </div>
 
-            {/* Modal Footer */}
             <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
               <button
                 onClick={() => setShowModal(false)}
@@ -549,50 +563,14 @@ export function SalesPage() {
         </div>
       )}
 
-      {/* ── View Invoice Modal ── */}
-      {viewedInvoice && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl my-6">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-              <h2 className="text-xl font-bold text-gray-900">Invoice — {viewedInvoice.invoice_no}</h2>
-              <button onClick={() => setViewInvoice(null)} className="p-2 hover:bg-gray-100 rounded-lg"><X size={20} /></button>
-            </div>
-            <div className="p-6 space-y-4">
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div><span className="text-gray-500">Customer:</span> <strong>{customerMap[viewedInvoice.customer_id] ?? '—'}</strong></div>
-                <div><span className="text-gray-500">Date:</span> <strong>{new Date(viewedInvoice.invoice_date + 'T00:00:00').toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</strong></div>
-              </div>
-              <div className="border border-gray-200 rounded-lg overflow-hidden">
-                <table className="w-full text-sm">
-                  <thead className="bg-gray-50 border-b border-gray-200">
-                    <tr>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase">Product</th>
-                      <th className="px-4 py-2 text-right text-xs font-medium text-gray-600 uppercase">Qty</th>
-                      <th className="px-4 py-2 text-right text-xs font-medium text-gray-600 uppercase">Rate</th>
-                      <th className="px-4 py-2 text-right text-xs font-medium text-gray-600 uppercase">Amount</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {(viewedInvoice.items ?? []).map(item => (
-                      <tr key={item.id}>
-                        <td className="px-4 py-3">{productMap[item.product_id]?.name ?? item.product_id}</td>
-                        <td className="px-4 py-3 text-right">{item.quantity}</td>
-                        <td className="px-4 py-3 text-right">₹{Number(item.rate).toLocaleString('en-IN')}</td>
-                        <td className="px-4 py-3 text-right font-semibold">₹{Number(item.amount).toLocaleString('en-IN')}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-4 space-y-2 text-sm">
-                <div className="flex justify-between"><span className="text-gray-600">Total</span><span className="font-semibold">₹{Number(viewedInvoice.total_amount).toLocaleString('en-IN')}</span></div>
-                <div className="flex justify-between"><span className="text-gray-600">Paid</span><span className="text-green-600 font-semibold">₹{Number(viewedInvoice.paid_amount).toLocaleString('en-IN')}</span></div>
-                <div className="flex justify-between border-t border-gray-200 pt-2"><span className="font-semibold">Outstanding</span><span className={`font-bold ${Number(viewedInvoice.outstanding_amount) > 0 ? 'text-orange-600' : 'text-green-600'}`}>₹{Number(viewedInvoice.outstanding_amount).toLocaleString('en-IN')}</span></div>
-              </div>
-              {viewedInvoice.notes && <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">{viewedInvoice.notes}</p>}
-            </div>
-          </div>
-        </div>
+      {/* ── Invoice Print/View Modal ── */}
+      {printInvoice && (
+        <InvoicePrintModal
+          invoice={printInvoice}
+          customer={printCustomer}
+          products={products}
+          onClose={() => setPrintInvoiceId(null)}
+        />
       )}
     </div>
   );
