@@ -1,8 +1,8 @@
 import { useAuth } from '../context/AuthContext';
-import { LogOut, Menu, X, LayoutDashboard, Users, Package, Warehouse, Factory, ShoppingCart } from 'lucide-react';
+import { LogOut, Menu, X, LayoutDashboard, Users, Package, Warehouse, Factory, ShoppingCart, Banknote } from 'lucide-react';
 import { useState } from 'react';
 
-type PageId = 'dashboard' | 'customers' | 'products' | 'stock' | 'production' | 'sales';
+type PageId = 'dashboard' | 'customers' | 'products' | 'stock' | 'production' | 'sales' | 'payments';
 
 interface LayoutProps {
   currentPage: PageId;
@@ -20,6 +20,7 @@ export function Layout({ currentPage, onNavigate, children }: LayoutProps) {
     { id: 'products' as PageId, label: 'Products / Tanks', icon: Package },
     { id: 'production' as PageId, label: 'Production Entry', icon: Factory },
     { id: 'sales' as PageId, label: 'Sales Invoice', icon: ShoppingCart },
+    { id: 'payments' as PageId, label: 'Payment Collection', icon: Banknote },
     { id: 'stock' as PageId, label: 'Stock Management', icon: Warehouse },
   ];
 
