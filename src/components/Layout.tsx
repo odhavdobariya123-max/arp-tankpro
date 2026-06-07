@@ -1,8 +1,8 @@
 import { useAuth } from '../context/AuthContext';
-import { LogOut, Menu, X, LayoutDashboard, Users, Package, Warehouse, Factory } from 'lucide-react';
+import { LogOut, Menu, X, LayoutDashboard, Users, Package, Warehouse, Factory, ShoppingCart } from 'lucide-react';
 import { useState } from 'react';
 
-type PageId = 'dashboard' | 'customers' | 'products' | 'stock' | 'production';
+type PageId = 'dashboard' | 'customers' | 'products' | 'stock' | 'production' | 'sales';
 
 interface LayoutProps {
   currentPage: PageId;
@@ -19,6 +19,7 @@ export function Layout({ currentPage, onNavigate, children }: LayoutProps) {
     { id: 'customers' as PageId, label: 'Customers', icon: Users },
     { id: 'products' as PageId, label: 'Products / Tanks', icon: Package },
     { id: 'production' as PageId, label: 'Production Entry', icon: Factory },
+    { id: 'sales' as PageId, label: 'Sales Invoice', icon: ShoppingCart },
     { id: 'stock' as PageId, label: 'Stock Management', icon: Warehouse },
   ];
 
@@ -35,21 +36,21 @@ export function Layout({ currentPage, onNavigate, children }: LayoutProps) {
           <p className="text-xs text-gray-400 mt-1">ERP System</p>
         </div>
 
-        <nav className="flex-1 p-4">
+        <nav className="flex-1 p-4 overflow-y-auto">
           {navigationItems.map((item) => {
             const Icon = item.icon;
             return (
               <button
                 key={item.id}
                 onClick={() => onNavigate(item.id)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition mb-2 ${
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition mb-1 ${
                   currentPage === item.id
                     ? 'bg-blue-600 text-white'
                     : 'text-gray-300 hover:bg-gray-800'
                 }`}
               >
                 <Icon size={20} />
-                <span>{item.label}</span>
+                <span className="text-sm">{item.label}</span>
               </button>
             );
           })}

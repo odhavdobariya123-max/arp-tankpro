@@ -6,10 +6,11 @@ import { CustomersPage } from './pages/CustomersPage';
 import { ProductsPage } from './pages/ProductsPage';
 import { StockPage } from './pages/StockPage';
 import { ProductionPage } from './pages/ProductionPage';
+import { SalesPage } from './pages/SalesPage';
 import { Layout } from './components/Layout';
 import { Toaster } from 'react-hot-toast';
 
-type PageId = 'dashboard' | 'customers' | 'products' | 'stock' | 'production';
+type PageId = 'dashboard' | 'customers' | 'products' | 'stock' | 'production' | 'sales';
 
 function App() {
   const { user } = useAuth();
@@ -30,8 +31,9 @@ function App() {
         {currentPage === 'dashboard' && <DashboardPage />}
         {currentPage === 'customers' && <CustomersPage />}
         {currentPage === 'products' && <ProductsPage />}
-        {currentPage === 'stock' && <StockPage />}
         {currentPage === 'production' && <ProductionPage />}
+        {currentPage === 'sales' && <SalesPage />}
+        {currentPage === 'stock' && <StockPage />}
       </Layout>
       <Toaster position="top-right" />
     </>

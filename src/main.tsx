@@ -7,6 +7,7 @@ import { CustomerProvider } from './context/CustomerContext'
 import { ProductProvider } from './context/ProductContext'
 import { StockProvider } from './context/StockContext'
 import { ProductionProvider } from './context/ProductionContext'
+import { SalesProvider } from './context/SalesContext'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
@@ -15,7 +16,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         <ProductProvider>
           <StockProvider>
             <ProductionProvider>
-              <App />
+              <SalesProvider>
+                <App />
+              </SalesProvider>
             </ProductionProvider>
           </StockProvider>
         </ProductProvider>
