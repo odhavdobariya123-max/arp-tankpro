@@ -8,10 +8,11 @@ import { StockPage } from './pages/StockPage';
 import { ProductionPage } from './pages/ProductionPage';
 import { SalesPage } from './pages/SalesPage';
 import { PaymentPage } from './pages/PaymentPage';
+import { LedgerPage } from './pages/LedgerPage';
 import { Layout } from './components/Layout';
 import { Toaster } from 'react-hot-toast';
 
-type PageId = 'dashboard' | 'customers' | 'products' | 'stock' | 'production' | 'sales' | 'payments';
+type PageId = 'dashboard' | 'customers' | 'products' | 'stock' | 'production' | 'sales' | 'payments' | 'ledger';
 
 function App() {
   const { user } = useAuth();
@@ -35,6 +36,7 @@ function App() {
         {currentPage === 'production' && <ProductionPage />}
         {currentPage === 'sales' && <SalesPage />}
         {currentPage === 'payments' && <PaymentPage />}
+        {currentPage === 'ledger' && <LedgerPage />}
         {currentPage === 'stock' && <StockPage />}
       </Layout>
       <Toaster position="top-right" />
