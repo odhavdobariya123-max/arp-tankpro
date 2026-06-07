@@ -1,8 +1,8 @@
 import { useAuth } from '../context/AuthContext';
-import { LogOut, Menu, X, LayoutDashboard, Users, Package } from 'lucide-react';
+import { LogOut, Menu, X, LayoutDashboard, Users, Package, Warehouse } from 'lucide-react';
 import { useState } from 'react';
 
-type PageId = 'dashboard' | 'customers' | 'products';
+type PageId = 'dashboard' | 'customers' | 'products' | 'stock';
 
 interface LayoutProps {
   currentPage: PageId;
@@ -18,6 +18,7 @@ export function Layout({ currentPage, onNavigate, children }: LayoutProps) {
     { id: 'dashboard' as PageId, label: 'Dashboard', icon: LayoutDashboard },
     { id: 'customers' as PageId, label: 'Customers', icon: Users },
     { id: 'products' as PageId, label: 'Products / Tanks', icon: Package },
+    { id: 'stock' as PageId, label: 'Stock Management', icon: Warehouse },
   ];
 
   return (

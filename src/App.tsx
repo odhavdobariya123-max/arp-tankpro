@@ -4,10 +4,11 @@ import { LoginPage } from './pages/LoginPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { CustomersPage } from './pages/CustomersPage';
 import { ProductsPage } from './pages/ProductsPage';
+import { StockPage } from './pages/StockPage';
 import { Layout } from './components/Layout';
 import { Toaster } from 'react-hot-toast';
 
-type PageId = 'dashboard' | 'customers' | 'products';
+type PageId = 'dashboard' | 'customers' | 'products' | 'stock';
 
 function App() {
   const { user } = useAuth();
@@ -28,6 +29,7 @@ function App() {
         {currentPage === 'dashboard' && <DashboardPage />}
         {currentPage === 'customers' && <CustomersPage />}
         {currentPage === 'products' && <ProductsPage />}
+        {currentPage === 'stock' && <StockPage />}
       </Layout>
       <Toaster position="top-right" />
     </>

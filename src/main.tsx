@@ -5,13 +5,16 @@ import './index.css'
 import { AuthProvider } from './context/AuthContext'
 import { CustomerProvider } from './context/CustomerContext'
 import { ProductProvider } from './context/ProductContext'
+import { StockProvider } from './context/StockContext'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <AuthProvider>
       <CustomerProvider>
         <ProductProvider>
-          <App />
+          <StockProvider>
+            <App />
+          </StockProvider>
         </ProductProvider>
       </CustomerProvider>
     </AuthProvider>

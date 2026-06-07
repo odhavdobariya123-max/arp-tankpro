@@ -1,5 +1,7 @@
 export type UserRole = 'admin' | 'partner' | 'staff';
 export type DealerType = 'Retail' | 'Dealer' | 'Distributor';
+export type TransactionType = 'IN' | 'OUT';
+export type ReferenceType = 'PRODUCTION' | 'SALE' | 'ADJUSTMENT';
 
 export interface User {
   id: string;
