@@ -1,8 +1,8 @@
 import { useAuth } from '../context/AuthContext';
-import { LogOut, Menu, X, LayoutDashboard, Users, Package, Warehouse, Factory, ShoppingCart, Banknote, BookOpen } from 'lucide-react';
+import { LogOut, Menu, X, LayoutDashboard, Users, Package, Warehouse, Factory, ShoppingCart, Banknote, BookOpen, BarChart2 } from 'lucide-react';
 import { useState } from 'react';
 
-type PageId = 'dashboard' | 'customers' | 'products' | 'stock' | 'production' | 'sales' | 'payments' | 'ledger';
+type PageId = 'dashboard' | 'customers' | 'products' | 'stock' | 'production' | 'sales' | 'payments' | 'ledger' | 'reports';
 
 interface LayoutProps {
   currentPage: PageId;
@@ -15,14 +15,15 @@ export function Layout({ currentPage, onNavigate, children }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const navigationItems = [
-    { id: 'dashboard' as PageId, label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'customers' as PageId, label: 'Customers', icon: Users },
-    { id: 'products' as PageId, label: 'Products / Tanks', icon: Package },
-    { id: 'production' as PageId, label: 'Production Entry', icon: Factory },
-    { id: 'sales' as PageId, label: 'Sales Invoice', icon: ShoppingCart },
-    { id: 'payments' as PageId, label: 'Payment Collection', icon: Banknote },
-    { id: 'ledger' as PageId, label: 'Customer Ledger', icon: BookOpen },
-    { id: 'stock' as PageId, label: 'Stock Management', icon: Warehouse },
+    { id: 'dashboard'  as PageId, label: 'Dashboard',          icon: LayoutDashboard },
+    { id: 'customers'  as PageId, label: 'Customers',           icon: Users },
+    { id: 'products'   as PageId, label: 'Products / Tanks',    icon: Package },
+    { id: 'production' as PageId, label: 'Production Entry',    icon: Factory },
+    { id: 'sales'      as PageId, label: 'Sales Invoice',       icon: ShoppingCart },
+    { id: 'payments'   as PageId, label: 'Payment Collection',  icon: Banknote },
+    { id: 'ledger'     as PageId, label: 'Customer Ledger',     icon: BookOpen },
+    { id: 'stock'      as PageId, label: 'Stock Management',    icon: Warehouse },
+    { id: 'reports'    as PageId, label: 'Reports',             icon: BarChart2 },
   ];
 
   return (
