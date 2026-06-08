@@ -9,23 +9,26 @@ import { StockProvider } from './context/StockContext'
 import { ProductionProvider } from './context/ProductionContext'
 import { SalesProvider } from './context/SalesContext'
 import { PaymentProvider } from './context/PaymentContext'
+import { CompanyProvider } from './context/CompanyContext'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <AuthProvider>
-      <CustomerProvider>
-        <ProductProvider>
-          <StockProvider>
-            <ProductionProvider>
-              <SalesProvider>
-                <PaymentProvider>
-                  <App />
-                </PaymentProvider>
-              </SalesProvider>
-            </ProductionProvider>
-          </StockProvider>
-        </ProductProvider>
-      </CustomerProvider>
+      <CompanyProvider>
+        <CustomerProvider>
+          <ProductProvider>
+            <StockProvider>
+              <ProductionProvider>
+                <SalesProvider>
+                  <PaymentProvider>
+                    <App />
+                  </PaymentProvider>
+                </SalesProvider>
+              </ProductionProvider>
+            </StockProvider>
+          </ProductProvider>
+        </CustomerProvider>
+      </CompanyProvider>
     </AuthProvider>
   </React.StrictMode>,
 )

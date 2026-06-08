@@ -3,6 +3,7 @@ import { X, Printer, Download } from 'lucide-react';
 import type { SalesInvoice } from '../context/SalesContext';
 import type { Customer } from '../types';
 import type { Product } from '../types';
+import { useCompany } from '../context/CompanyContext';
 
 interface InvoicePrintModalProps {
   invoice: SalesInvoice;
@@ -29,12 +30,24 @@ const TERMS = [
 ];
 
 export function InvoicePrintModal({ invoice, customer, products, onClose }: InvoicePrintModalProps) {
+  const { settings } = useCompany();
+
   const productMap = new Map(products.map(p => [p.id, p]));
   const items = invoice.items ?? [];
   const subTotal = Number(invoice.total_amount);
   const paidAmt = Number(invoice.paid_amount);
   const outstanding = Number(invoice.outstanding_amount);
   const totalWords = amountToWords(subTotal);
+
+  // Derived company info — fall back to ARP TankPro defaults if not yet set
+  const companyName    = settings?.company_name   || 'ARP TankPro';
+  const brandName      = settings?.brand_name     || 'Complete Water Tank Business Management';
+  const companyMobile  = settings?.mobile         || '—';
+  const companyEmail   = settings?.email          || '—';
+  const companyAddress = [settings?.address, settings?.city, settings?.state, settings?.pincode]
+    .filter(Boolean).join(', ') || 'Rajkot, Gujarat, India';
+  const companyGST     = settings?.gst_number     || '—';
+  const companyLogo    = settings?.logo_url        || '';
 
   useEffect(() => {
     const style = document.createElement('style');
@@ -64,6 +77,7 @@ export function InvoicePrintModal({ invoice, customer, products, onClose }: Invo
   }, []);
 
   const handlePrint = () => window.print();
+
   const handlePDF = () => {
     const tip = document.getElementById('__pdf_tip__');
     if (tip) { tip.style.display = 'block'; setTimeout(() => { if (tip) tip.style.display = 'none'; }, 5000); }
@@ -115,18 +129,27 @@ export function InvoicePrintModal({ invoice, customer, products, onClose }: Invo
               ))}
             </div>
 
-            {/* Row 3 — Company Header */}
-            <div style={{ borderBottom: BORDER, padding: '6px 10px', textAlign: 'center' }}>
-              <div style={{ fontSize: 18, fontWeight: 700, letterSpacing: 1 }}>ARP TankPro</div>
-              <div style={{ fontSize: 11, marginTop: 2 }}>Complete Water Tank Business Management</div>
-              <div style={{ fontSize: 10, marginTop: 2, color: '#333' }}>
-                Rajkot, Gujarat, India &nbsp;|&nbsp; Ph: — &nbsp;|&nbsp; Email: —
+            {/* Row 3 — Company Header (from Settings) */}
+            <div style={{ borderBottom: BORDER, padding: '6px 10px', display: 'flex', alignItems: 'center', gap: 12 }}>
+              {companyLogo && (
+                <img src={companyLogo} alt="Logo" style={{ width: 52, height: 52, objectFit: 'contain' }} />
+              )}
+              <div style={{ flex: 1, textAlign: 'center' }}>
+                <div style={{ fontSize: 18, fontWeight: 700, letterSpacing: 1 }}>{companyName}</div>
+                {brandName && <div style={{ fontSize: 11, marginTop: 2 }}>{brandName}</div>}
+                <div style={{ fontSize: 10, marginTop: 2, color: '#333' }}>
+                  {companyAddress}
+                  {companyMobile !== '—' && <span> &nbsp;|&nbsp; Ph: {companyMobile}</span>}
+                  {companyEmail !== '—' && <span> &nbsp;|&nbsp; {companyEmail}</span>}
+                </div>
+                {companyGST !== '—' && (
+                  <div style={{ fontSize: 10, marginTop: 2, fontWeight: 600 }}>GSTIN: {companyGST}</div>
+                )}
               </div>
             </div>
 
             {/* Row 4 — M/s + Invoice No/Date */}
             <div style={{ display: 'flex', borderBottom: BORDER, minHeight: 72 }}>
-              {/* Left — customer */}
               <div style={{ flex: 1, padding: '6px 10px', borderRight: BORDER }}>
                 <div style={{ fontSize: 10, color: '#555', marginBottom: 2 }}>M/s :</div>
                 <div style={{ fontWeight: 700, fontSize: 13 }}>{customer?.name ?? '—'}</div>
@@ -136,22 +159,19 @@ export function InvoicePrintModal({ invoice, customer, products, onClose }: Invo
                   ? <div style={{ fontSize: 11, marginTop: 2 }}>GSTIN: <strong>{customer.gst_number}</strong></div>
                   : <div style={{ fontSize: 10, color: '#888', marginTop: 2 }}>GSTIN: Unregistered</div>}
               </div>
-              {/* Right — invoice meta */}
               <div style={{ width: 200, padding: '6px 10px' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
                   <tbody>
-                    <tr>
-                      <td style={{ paddingBottom: 4, fontWeight: 600, whiteSpace: 'nowrap' }}>Invoice No&nbsp;:</td>
-                      <td style={{ paddingBottom: 4, paddingLeft: 4 }}>{invoice.invoice_no}</td>
-                    </tr>
-                    <tr>
-                      <td style={{ paddingBottom: 4, fontWeight: 600, whiteSpace: 'nowrap' }}>Date&nbsp;:</td>
-                      <td style={{ paddingBottom: 4, paddingLeft: 4 }}>{fmtDate(invoice.invoice_date)}</td>
-                    </tr>
-                    <tr>
-                      <td style={{ fontWeight: 600, whiteSpace: 'nowrap' }}>Type&nbsp;:</td>
-                      <td style={{ paddingLeft: 4 }}>{customer?.dealer_type ?? '—'}</td>
-                    </tr>
+                    {[
+                      ['Invoice No', invoice.invoice_no],
+                      ['Date', fmtDate(invoice.invoice_date)],
+                      ['Type', customer?.dealer_type ?? '—'],
+                    ].map(([label, value]) => (
+                      <tr key={label}>
+                        <td style={{ paddingBottom: 4, fontWeight: 600, whiteSpace: 'nowrap' }}>{label}&nbsp;:</td>
+                        <td style={{ paddingBottom: 4, paddingLeft: 4 }}>{value}</td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
@@ -179,7 +199,7 @@ export function InvoicePrintModal({ invoice, customer, products, onClose }: Invo
                   items.map((item, idx) => {
                     const prod = productMap.get(item.product_id);
                     const desc = prod
-                      ? [prod.tank_name, prod.capacity, prod.layer_type, prod.color].filter(Boolean).join(' | ')
+                      ? [prod.tank_name, prod.capacity, prod.layer_type ? `${prod.layer_type} Layer` : null, prod.color].filter(Boolean).join(' | ')
                       : '—';
                     return (
                       <tr key={item.id}>
@@ -194,25 +214,19 @@ export function InvoicePrintModal({ invoice, customer, products, onClose }: Invo
                     );
                   })
                 )}
-                {/* Filler rows to reach minimum height */}
+                {/* Filler rows */}
                 {Array.from({ length: Math.max(0, 6 - items.length) }).map((_, i) => (
                   <tr key={`filler-${i}`} style={{ height: 22 }}>
-                    <td style={{ ...cell }}>&nbsp;</td>
-                    <td style={{ ...cell }}>&nbsp;</td>
-                    <td style={{ ...cell }}>&nbsp;</td>
-                    <td style={{ ...cell }}>&nbsp;</td>
-                    <td style={{ ...cell }}>&nbsp;</td>
-                    <td style={{ ...cell }}>&nbsp;</td>
-                    <td style={{ ...cell }}>&nbsp;</td>
+                    {[...Array(7)].map((_, j) => <td key={j} style={{ ...cell }}>&nbsp;</td>)}
                   </tr>
                 ))}
               </tbody>
             </table>
 
-            {/* Row 6 — GSTIN + Subtotal */}
+            {/* Row 6 — Company GSTIN + Subtotal */}
             <div style={{ display: 'flex', borderTop: BORDER }}>
               <div style={{ flex: 1, padding: '4px 10px', borderRight: BORDER, fontSize: 11 }}>
-                <strong>GSTIN :</strong>&nbsp;{customer?.gst_number ?? 'Unregistered'}
+                <strong>Seller GSTIN :</strong>&nbsp;{companyGST}
               </div>
               <div style={{ width: 152, padding: '4px 10px', display: 'flex', justifyContent: 'space-between', fontWeight: 600, fontSize: 11 }}>
                 <span>Sub Total</span>
@@ -251,14 +265,14 @@ export function InvoicePrintModal({ invoice, customer, products, onClose }: Invo
                 </ol>
               </div>
               <div style={{ width: 200, padding: '6px 10px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', fontSize: 11 }}>
-                <div style={{ textAlign: 'center', fontWeight: 600, fontSize: 11 }}>For ARP TankPro</div>
+                <div style={{ textAlign: 'center', fontWeight: 600 }}>For {companyName}</div>
                 <div style={{ textAlign: 'center', borderTop: '1px solid #000', paddingTop: 4, fontSize: 10, marginTop: 30 }}>
                   Authorized Signatory
                 </div>
               </div>
             </div>
 
-            {/* Row 10 — Footer strip */}
+            {/* Row 10 — Footer */}
             <div style={{ borderTop: BORDER, padding: '3px 10px', textAlign: 'center', fontSize: 9, color: '#555' }}>
               This is a computer generated estimate. Generated by ARP TankPro ERP · {new Date().toLocaleString('en-IN')}
             </div>

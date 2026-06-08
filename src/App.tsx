@@ -10,10 +10,14 @@ import { SalesPage } from './pages/SalesPage';
 import { PaymentPage } from './pages/PaymentPage';
 import { LedgerPage } from './pages/LedgerPage';
 import { ReportsPage } from './pages/ReportsPage';
+import { SettingsPage } from './pages/SettingsPage';
 import { Layout } from './components/Layout';
 import { Toaster } from 'react-hot-toast';
 
-type PageId = 'dashboard' | 'customers' | 'products' | 'stock' | 'production' | 'sales' | 'payments' | 'ledger' | 'reports';
+type PageId =
+  | 'dashboard' | 'customers' | 'products' | 'stock'
+  | 'production' | 'sales' | 'payments' | 'ledger'
+  | 'reports' | 'settings';
 
 function App() {
   const { user } = useAuth();
@@ -40,6 +44,7 @@ function App() {
         {currentPage === 'ledger'     && <LedgerPage />}
         {currentPage === 'stock'      && <StockPage />}
         {currentPage === 'reports'    && <ReportsPage />}
+        {currentPage === 'settings'   && <SettingsPage />}
       </Layout>
       <Toaster position="top-right" />
     </>
