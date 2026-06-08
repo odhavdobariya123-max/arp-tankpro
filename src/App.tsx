@@ -11,14 +11,14 @@ import { PaymentPage } from './pages/PaymentPage';
 import { LedgerPage } from './pages/LedgerPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { SettingsPage } from './pages/SettingsPage';
-import { DealerSchemePage } from './pages/DealerSchemePage';
+import { DealerPerformancePage } from './pages/DealerPerformancePage';
 import { Layout } from './components/Layout';
 import { Toaster } from 'react-hot-toast';
 
 type PageId =
   | 'dashboard' | 'customers' | 'products' | 'stock'
   | 'production' | 'sales' | 'payments' | 'ledger'
-  | 'reports' | 'settings' | 'dealer_schemes';
+  | 'reports' | 'settings' | 'dealer_performance';
 
 function App() {
   const { user } = useAuth();
@@ -36,17 +36,17 @@ function App() {
   return (
     <>
       <Layout currentPage={currentPage} onNavigate={setCurrentPage}>
-        {currentPage === 'dashboard'      && <DashboardPage />}
-        {currentPage === 'customers'      && <CustomersPage />}
-        {currentPage === 'products'       && <ProductsPage />}
-        {currentPage === 'production'     && <ProductionPage />}
-        {currentPage === 'sales'          && <SalesPage />}
-        {currentPage === 'payments'       && <PaymentPage />}
-        {currentPage === 'ledger'         && <LedgerPage />}
-        {currentPage === 'stock'          && <StockPage />}
-        {currentPage === 'reports'        && <ReportsPage />}
-        {currentPage === 'dealer_schemes' && <DealerSchemePage />}
-        {currentPage === 'settings'       && <SettingsPage />}
+        {currentPage === 'dashboard'          && <DashboardPage />}
+        {currentPage === 'customers'          && <CustomersPage />}
+        {currentPage === 'products'           && <ProductsPage />}
+        {currentPage === 'production'         && <ProductionPage />}
+        {currentPage === 'sales'              && <SalesPage />}
+        {currentPage === 'payments'           && <PaymentPage />}
+        {currentPage === 'ledger'             && <LedgerPage />}
+        {currentPage === 'stock'              && <StockPage />}
+        {currentPage === 'reports'            && <ReportsPage />}
+        {currentPage === 'dealer_performance' && <DealerPerformancePage />}
+        {currentPage === 'settings'           && <SettingsPage />}
       </Layout>
       <Toaster position="top-right" />
     </>
