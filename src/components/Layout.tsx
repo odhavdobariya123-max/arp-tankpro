@@ -2,14 +2,14 @@ import { useAuth } from '../context/AuthContext';
 import {
   LogOut, Menu, X, LayoutDashboard, Users, Package,
   Warehouse, Factory, ShoppingCart, Banknote, BookOpen,
-  BarChart2, Settings,
+  BarChart2, Settings, Award,
 } from 'lucide-react';
 import { useState } from 'react';
 
 type PageId =
   | 'dashboard' | 'customers' | 'products' | 'stock'
   | 'production' | 'sales' | 'payments' | 'ledger'
-  | 'reports' | 'settings';
+  | 'reports' | 'settings' | 'dealer_schemes';
 
 interface LayoutProps {
   currentPage: PageId;
@@ -22,16 +22,17 @@ export function Layout({ currentPage, onNavigate, children }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const navigationItems: { id: PageId; label: string; icon: React.ElementType; dividerBefore?: boolean }[] = [
-    { id: 'dashboard',  label: 'Dashboard',          icon: LayoutDashboard },
-    { id: 'customers',  label: 'Customers',           icon: Users },
-    { id: 'products',   label: 'Products / Tanks',    icon: Package },
-    { id: 'production', label: 'Production Entry',    icon: Factory },
-    { id: 'sales',      label: 'Sales Invoice',       icon: ShoppingCart },
-    { id: 'payments',   label: 'Payment Collection',  icon: Banknote },
-    { id: 'ledger',     label: 'Customer Ledger',     icon: BookOpen },
-    { id: 'stock',      label: 'Stock Management',    icon: Warehouse },
-    { id: 'reports',    label: 'Reports',             icon: BarChart2, dividerBefore: true },
-    { id: 'settings',   label: 'Settings',            icon: Settings },
+    { id: 'dashboard',      label: 'Dashboard',          icon: LayoutDashboard },
+    { id: 'customers',      label: 'Customers',           icon: Users },
+    { id: 'products',       label: 'Products / Tanks',    icon: Package },
+    { id: 'production',     label: 'Production Entry',    icon: Factory },
+    { id: 'sales',          label: 'Sales Invoice',       icon: ShoppingCart },
+    { id: 'payments',       label: 'Payment Collection',  icon: Banknote },
+    { id: 'ledger',         label: 'Customer Ledger',     icon: BookOpen },
+    { id: 'stock',          label: 'Stock Management',    icon: Warehouse },
+    { id: 'dealer_schemes', label: 'Dealer Schemes',      icon: Award,       dividerBefore: true },
+    { id: 'reports',        label: 'Reports',             icon: BarChart2 },
+    { id: 'settings',       label: 'Settings',            icon: Settings },
   ];
 
   return (
