@@ -13,34 +13,50 @@ interface InvoicePrintModalProps {
 
 function fmtDate(dateStr: string) {
   return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-IN', {
-    day: '2-digit', month: 'long', year: 'numeric',
+    day: '2-digit', month: '2-digit', year: 'numeric',
   });
 }
 
-function fmtINR(n: number) {
-  return `₹${Number(n).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+function fmtINR(n: number | string) {
+  return Number(n).toLocaleString('en-IN', { minimumFractionDigits: 2 });
 }
+
+const TERMS = [
+  'Goods once sold will not be taken back.',
+  'All disputes are subject to Rajkot jurisdiction only.',
+  'Interest @ 24% p.a. will be charged on overdue payments.',
+  'E. & O. E.',
+];
 
 export function InvoicePrintModal({ invoice, customer, products, onClose }: InvoicePrintModalProps) {
   const productMap = new Map(products.map(p => [p.id, p]));
+  const items = invoice.items ?? [];
+  const subTotal = Number(invoice.total_amount);
+  const paidAmt = Number(invoice.paid_amount);
+  const outstanding = Number(invoice.outstanding_amount);
+  const totalWords = amountToWords(subTotal);
 
-  // Inject print CSS on mount, remove on unmount
   useEffect(() => {
     const style = document.createElement('style');
     style.id = '__arp_invoice_print_css__';
     style.textContent = `
       @media print {
-        body * { visibility: hidden !important; }
-        #arp-invoice-print-area,
-        #arp-invoice-print-area * { visibility: visible !important; }
-        #arp-invoice-print-area {
+        @page { size: A4 portrait; margin: 8mm; }
+        body > * { display: none !important; }
+        #arp-invoice-print-wrapper { display: block !important; }
+        #arp-invoice-print-wrapper * { visibility: visible !important; }
+        #arp-invoice-print-wrapper {
           position: fixed !important;
-          left: 0 !important; top: 0 !important;
-          width: 100% !important;
+          inset: 0 !important;
+          z-index: 999999 !important;
           background: white !important;
-          z-index: 99999 !important;
+          overflow: visible !important;
         }
         .no-print { display: none !important; }
+        .print-page {
+          width: 100% !important;
+          font-size: 11px !important;
+        }
       }
     `;
     document.head.appendChild(style);
@@ -48,219 +64,204 @@ export function InvoicePrintModal({ invoice, customer, products, onClose }: Invo
   }, []);
 
   const handlePrint = () => window.print();
-
-  const handleDownloadPDF = () => {
-    const msg = document.getElementById('__pdf_tip__');
-    if (msg) { msg.style.display = 'block'; setTimeout(() => { if (msg) msg.style.display = 'none'; }, 4000); }
+  const handlePDF = () => {
+    const tip = document.getElementById('__pdf_tip__');
+    if (tip) { tip.style.display = 'block'; setTimeout(() => { if (tip) tip.style.display = 'none'; }, 5000); }
     window.print();
   };
 
-  const items = invoice.items ?? [];
-  const totalWords = amountToWords(Number(invoice.total_amount));
+  const BORDER = '1px solid #000';
+  const cell = { border: BORDER, padding: '4px 6px', verticalAlign: 'top' as const };
+  const thCell = { ...cell, textAlign: 'center' as const, fontWeight: 700, background: '#f5f5f5' };
 
   return (
-    <div className="fixed inset-0 bg-black/60 z-50 flex items-start justify-center p-4 overflow-y-auto">
-      <div className="w-full max-w-4xl my-6">
+    <div className="fixed inset-0 bg-black/70 z-50 flex items-start justify-center p-4 overflow-y-auto">
+      <div className="w-full max-w-4xl my-4">
 
-        {/* Action Toolbar — hidden on print */}
-        <div className="no-print flex items-center justify-between bg-gray-800 text-white px-6 py-3 rounded-t-xl">
-          <h3 className="font-semibold text-sm">Invoice Preview — {invoice.invoice_no}</h3>
+        {/* ── Toolbar (no-print) ── */}
+        <div className="no-print flex items-center justify-between bg-gray-900 text-white px-5 py-3 rounded-t-lg">
+          <span className="text-sm font-semibold">Estimate Preview — {invoice.invoice_no}</span>
           <div className="flex items-center gap-3">
-            <p id="__pdf_tip__" className="text-xs text-yellow-300 hidden">
-              In the print dialog, set Destination → "Save as PDF"
-            </p>
-            <button
-              onClick={handleDownloadPDF}
-              className="flex items-center gap-2 bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg text-sm transition"
-            >
-              <Download size={15} /> Download PDF
+            <span id="__pdf_tip__" className="text-xs text-yellow-300" style={{ display: 'none' }}>
+              In print dialog → Destination → "Save as PDF"
+            </span>
+            <button onClick={handlePDF} className="flex items-center gap-1.5 bg-green-600 hover:bg-green-700 px-3 py-1.5 rounded text-sm transition">
+              <Download size={14} /> PDF
             </button>
-            <button
-              onClick={handlePrint}
-              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-sm transition"
-            >
-              <Printer size={15} /> Print Invoice
+            <button onClick={handlePrint} className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded text-sm transition">
+              <Printer size={14} /> Print
             </button>
-            <button onClick={onClose} className="p-2 hover:bg-gray-700 rounded-lg transition">
-              <X size={18} />
+            <button onClick={onClose} className="p-1.5 hover:bg-gray-700 rounded transition">
+              <X size={16} />
             </button>
           </div>
         </div>
 
-        {/* ── PRINTABLE INVOICE ── */}
-        <div id="arp-invoice-print-area" className="bg-white shadow-2xl rounded-b-xl overflow-hidden">
+        {/* ── PRINTABLE AREA ── */}
+        <div id="arp-invoice-print-wrapper">
+          <div className="print-page bg-white" style={{ fontFamily: 'Arial, sans-serif', fontSize: 12, color: '#000', border: '2px solid #000', padding: 0 }}>
 
-          {/* Header Band */}
-          <div className="bg-gradient-to-r from-blue-700 to-blue-500 px-8 py-6 text-white">
-            <div className="flex items-start justify-between">
-              <div>
-                <h1 className="text-3xl font-extrabold tracking-tight">ARP TankPro</h1>
-                <p className="text-blue-200 text-sm mt-1 font-medium">Complete Water Tank Business Management</p>
-                <p className="text-blue-300 text-xs mt-3">Rajkot, Gujarat, India</p>
-              </div>
-              <div className="text-right">
-                <div className="bg-white/20 backdrop-blur rounded-xl px-5 py-3 inline-block">
-                  <p className="text-blue-100 text-xs font-medium uppercase tracking-widest">Tax Invoice</p>
-                  <p className="text-white text-2xl font-bold mt-1">{invoice.invoice_no}</p>
-                  <p className="text-blue-200 text-xs mt-1">{fmtDate(invoice.invoice_date)}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Customer Info + Invoice Meta */}
-          <div className="px-8 py-6 grid grid-cols-2 gap-8 border-b border-gray-200 bg-gray-50">
-
-            {/* Bill To */}
-            <div>
-              <p className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-3">Bill To</p>
-              {customer ? (
-                <div className="space-y-1">
-                  <p className="text-gray-900 font-bold text-lg leading-tight">{customer.name}</p>
-                  {customer.address && <p className="text-gray-600 text-sm">{customer.address}</p>}
-                  {customer.city && <p className="text-gray-600 text-sm">{customer.city}</p>}
-                  {customer.mobile && (
-                    <p className="text-gray-600 text-sm">
-                      <span className="font-medium">Mobile:</span> {customer.mobile}
-                    </p>
-                  )}
-                  {customer.gst_number && (
-                    <p className="text-gray-600 text-sm">
-                      <span className="font-medium">GSTIN:</span> {customer.gst_number}
-                    </p>
-                  )}
-                  <span className="inline-block mt-2 px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full font-medium">
-                    {customer.dealer_type}
-                  </span>
-                </div>
-              ) : (
-                <p className="text-gray-400 text-sm italic">Customer details unavailable</p>
-              )}
+            {/* Row 1 — ESTIMATE (A) title */}
+            <div style={{ borderBottom: BORDER, textAlign: 'center', padding: '4px 0', fontWeight: 700, fontSize: 15, letterSpacing: 2 }}>
+              ESTIMATE &nbsp;( A )
             </div>
 
-            {/* Invoice Details */}
-            <div>
-              <p className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-3">Invoice Details</p>
-              <table className="text-sm w-full">
-                <tbody className="space-y-1">
-                  {[
-                    ['Invoice No', invoice.invoice_no],
-                    ['Invoice Date', fmtDate(invoice.invoice_date)],
-                    ['Payment Status', Number(invoice.outstanding_amount) === 0 ? '✅ Paid' : Number(invoice.paid_amount) > 0 ? '⏳ Partial' : '🔴 Unpaid'],
-                  ].map(([label, value]) => (
-                    <tr key={label} className="border-b border-gray-100">
-                      <td className="py-1.5 text-gray-500 font-medium w-32">{label}</td>
-                      <td className="py-1.5 text-gray-800 font-semibold">{value}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {/* Items Table */}
-          <div className="px-8 py-6">
-            <table className="w-full text-sm border-collapse">
-              <thead>
-                <tr className="bg-blue-600 text-white">
-                  <th className="px-3 py-3 text-left font-semibold text-xs uppercase tracking-wide rounded-tl-lg">#</th>
-                  <th className="px-3 py-3 text-left font-semibold text-xs uppercase tracking-wide">Product</th>
-                  <th className="px-3 py-3 text-center font-semibold text-xs uppercase tracking-wide">Capacity</th>
-                  <th className="px-3 py-3 text-center font-semibold text-xs uppercase tracking-wide">Layer</th>
-                  <th className="px-3 py-3 text-center font-semibold text-xs uppercase tracking-wide">Color</th>
-                  <th className="px-3 py-3 text-right font-semibold text-xs uppercase tracking-wide">Qty</th>
-                  <th className="px-3 py-3 text-right font-semibold text-xs uppercase tracking-wide">Rate (₹)</th>
-                  <th className="px-3 py-3 text-right font-semibold text-xs uppercase tracking-wide rounded-tr-lg">Amount (₹)</th>
-                </tr>
-              </thead>
-              <tbody>
-                {items.length === 0 ? (
-                  <tr>
-                    <td colSpan={8} className="px-4 py-6 text-center text-gray-400 italic">No items</td>
-                  </tr>
-                ) : (
-                  items.map((item, idx) => {
-                    const product = productMap.get(item.product_id);
-                    return (
-                      <tr key={item.id} className={idx % 2 === 0 ? 'bg-white' : 'bg-blue-50/30'}>
-                        <td className="px-3 py-3 text-gray-500 border-b border-gray-100">{idx + 1}</td>
-                        <td className="px-3 py-3 font-semibold text-gray-900 border-b border-gray-100">
-                          {product?.tank_name ?? '—'}
-                        </td>
-                        <td className="px-3 py-3 text-center text-gray-600 border-b border-gray-100">
-                          {product?.capacity ?? '—'}
-                        </td>
-                        <td className="px-3 py-3 text-center text-gray-600 border-b border-gray-100">
-                          {product?.layer_type ?? '—'}
-                        </td>
-                        <td className="px-3 py-3 text-center text-gray-600 border-b border-gray-100">
-                          {product?.color ?? '—'}
-                        </td>
-                        <td className="px-3 py-3 text-right font-medium text-gray-700 border-b border-gray-100">
-                          {item.quantity}
-                        </td>
-                        <td className="px-3 py-3 text-right text-gray-700 border-b border-gray-100">
-                          {fmtINR(item.rate)}
-                        </td>
-                        <td className="px-3 py-3 text-right font-bold text-gray-900 border-b border-gray-100">
-                          {fmtINR(item.amount)}
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Totals + Notes */}
-          <div className="px-8 pb-6 grid grid-cols-2 gap-8">
-
-            {/* Notes */}
-            <div>
-              {invoice.notes && (
-                <div className="mb-4">
-                  <p className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-2">Notes</p>
-                  <p className="text-sm text-gray-600 bg-blue-50 border border-blue-100 rounded-lg p-3 leading-relaxed">
-                    {invoice.notes}
-                  </p>
+            {/* Row 2 — Debit Memo / OTHER / Original */}
+            <div style={{ display: 'flex', borderBottom: BORDER }}>
+              {['Debit Memo', 'OTHER', 'Original'].map((label, i) => (
+                <div key={i} style={{ flex: 1, textAlign: 'center', padding: '3px 0', fontWeight: 600, fontSize: 11, borderRight: i < 2 ? BORDER : 'none' }}>
+                  {label}
                 </div>
-              )}
-              <div>
-                <p className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-2">Amount in Words</p>
-                <p className="text-sm text-gray-700 italic font-medium">{totalWords}</p>
+              ))}
+            </div>
+
+            {/* Row 3 — Company Header */}
+            <div style={{ borderBottom: BORDER, padding: '6px 10px', textAlign: 'center' }}>
+              <div style={{ fontSize: 18, fontWeight: 700, letterSpacing: 1 }}>ARP TankPro</div>
+              <div style={{ fontSize: 11, marginTop: 2 }}>Complete Water Tank Business Management</div>
+              <div style={{ fontSize: 10, marginTop: 2, color: '#333' }}>
+                Rajkot, Gujarat, India &nbsp;|&nbsp; Ph: — &nbsp;|&nbsp; Email: —
               </div>
             </div>
 
-            {/* Summary Box */}
-            <div>
-              <div className="bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
-                <table className="w-full text-sm">
+            {/* Row 4 — M/s + Invoice No/Date */}
+            <div style={{ display: 'flex', borderBottom: BORDER, minHeight: 72 }}>
+              {/* Left — customer */}
+              <div style={{ flex: 1, padding: '6px 10px', borderRight: BORDER }}>
+                <div style={{ fontSize: 10, color: '#555', marginBottom: 2 }}>M/s :</div>
+                <div style={{ fontWeight: 700, fontSize: 13 }}>{customer?.name ?? '—'}</div>
+                {customer?.address && <div style={{ fontSize: 11, marginTop: 2 }}>{customer.address}{customer.city ? `, ${customer.city}` : ''}</div>}
+                {customer?.mobile && <div style={{ fontSize: 11, marginTop: 2 }}>Mob: {customer.mobile}</div>}
+                {customer?.gst_number
+                  ? <div style={{ fontSize: 11, marginTop: 2 }}>GSTIN: <strong>{customer.gst_number}</strong></div>
+                  : <div style={{ fontSize: 10, color: '#888', marginTop: 2 }}>GSTIN: Unregistered</div>}
+              </div>
+              {/* Right — invoice meta */}
+              <div style={{ width: 200, padding: '6px 10px' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
                   <tbody>
-                    <tr className="border-b border-gray-200">
-                      <td className="px-5 py-3 text-gray-600 font-medium">Subtotal</td>
-                      <td className="px-5 py-3 text-right font-semibold text-gray-900">{fmtINR(invoice.total_amount)}</td>
+                    <tr>
+                      <td style={{ paddingBottom: 4, fontWeight: 600, whiteSpace: 'nowrap' }}>Invoice No&nbsp;:</td>
+                      <td style={{ paddingBottom: 4, paddingLeft: 4 }}>{invoice.invoice_no}</td>
                     </tr>
-                    <tr className="border-b border-gray-200">
-                      <td className="px-5 py-3 text-gray-600 font-medium">Amount Paid</td>
-                      <td className="px-5 py-3 text-right font-semibold text-green-600">{fmtINR(invoice.paid_amount)}</td>
+                    <tr>
+                      <td style={{ paddingBottom: 4, fontWeight: 600, whiteSpace: 'nowrap' }}>Date&nbsp;:</td>
+                      <td style={{ paddingBottom: 4, paddingLeft: 4 }}>{fmtDate(invoice.invoice_date)}</td>
                     </tr>
-                    <tr className="bg-blue-600 text-white">
-                      <td className="px-5 py-4 font-bold text-base">Outstanding Amount</td>
-                      <td className={`px-5 py-4 text-right font-extrabold text-xl ${Number(invoice.outstanding_amount) === 0 ? 'text-green-300' : 'text-yellow-200'}`}>
-                        {fmtINR(invoice.outstanding_amount)}
-                      </td>
+                    <tr>
+                      <td style={{ fontWeight: 600, whiteSpace: 'nowrap' }}>Type&nbsp;:</td>
+                      <td style={{ paddingLeft: 4 }}>{customer?.dealer_type ?? '—'}</td>
                     </tr>
                   </tbody>
                 </table>
               </div>
             </div>
-          </div>
 
-          {/* Footer */}
-          <div className="px-8 py-5 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
-            <p className="text-xs text-gray-400">Generated by ARP TankPro ERP · {new Date().toLocaleString('en-IN')}</p>
-            <p className="text-sm font-bold text-blue-600">Thank you for your business! 🙏</p>
+            {/* Row 5 — Product Table */}
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
+              <thead>
+                <tr>
+                  <th style={{ ...thCell, width: 28 }}>Sr</th>
+                  <th style={{ ...thCell, textAlign: 'left' }}>Product Description</th>
+                  <th style={{ ...thCell, width: 60 }}>HSN</th>
+                  <th style={{ ...thCell, width: 40 }}>Qty</th>
+                  <th style={{ ...thCell, width: 70 }}>Rate (₹)</th>
+                  <th style={{ ...thCell, width: 52 }}>GST %</th>
+                  <th style={{ ...thCell, width: 80 }}>Amount (₹)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {items.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} style={{ ...cell, textAlign: 'center', color: '#888', padding: '12px' }}>No items</td>
+                  </tr>
+                ) : (
+                  items.map((item, idx) => {
+                    const prod = productMap.get(item.product_id);
+                    const desc = prod
+                      ? [prod.tank_name, prod.capacity, prod.layer_type, prod.color].filter(Boolean).join(' | ')
+                      : '—';
+                    return (
+                      <tr key={item.id}>
+                        <td style={{ ...cell, textAlign: 'center' }}>{idx + 1}</td>
+                        <td style={{ ...cell }}>{desc}</td>
+                        <td style={{ ...cell, textAlign: 'center' }}>—</td>
+                        <td style={{ ...cell, textAlign: 'center' }}>{item.quantity}</td>
+                        <td style={{ ...cell, textAlign: 'right' }}>{fmtINR(item.rate)}</td>
+                        <td style={{ ...cell, textAlign: 'center' }}>—</td>
+                        <td style={{ ...cell, textAlign: 'right' }}>{fmtINR(item.amount)}</td>
+                      </tr>
+                    );
+                  })
+                )}
+                {/* Filler rows to reach minimum height */}
+                {Array.from({ length: Math.max(0, 6 - items.length) }).map((_, i) => (
+                  <tr key={`filler-${i}`} style={{ height: 22 }}>
+                    <td style={{ ...cell }}>&nbsp;</td>
+                    <td style={{ ...cell }}>&nbsp;</td>
+                    <td style={{ ...cell }}>&nbsp;</td>
+                    <td style={{ ...cell }}>&nbsp;</td>
+                    <td style={{ ...cell }}>&nbsp;</td>
+                    <td style={{ ...cell }}>&nbsp;</td>
+                    <td style={{ ...cell }}>&nbsp;</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {/* Row 6 — GSTIN + Subtotal */}
+            <div style={{ display: 'flex', borderTop: BORDER }}>
+              <div style={{ flex: 1, padding: '4px 10px', borderRight: BORDER, fontSize: 11 }}>
+                <strong>GSTIN :</strong>&nbsp;{customer?.gst_number ?? 'Unregistered'}
+              </div>
+              <div style={{ width: 152, padding: '4px 10px', display: 'flex', justifyContent: 'space-between', fontWeight: 600, fontSize: 11 }}>
+                <span>Sub Total</span>
+                <span>₹ {fmtINR(subTotal)}</span>
+              </div>
+            </div>
+
+            {/* Row 7 — Notes + Amount Paid */}
+            <div style={{ display: 'flex', borderTop: BORDER }}>
+              <div style={{ flex: 1, padding: '4px 10px', borderRight: BORDER, fontSize: 11, minHeight: 30 }}>
+                <strong>Notes :</strong>&nbsp;{invoice.notes ?? '—'}
+              </div>
+              <div style={{ width: 152, padding: '4px 10px', display: 'flex', justifyContent: 'space-between', fontSize: 11, color: '#197a00', fontWeight: 600 }}>
+                <span>Amt Paid</span>
+                <span>₹ {fmtINR(paidAmt)}</span>
+              </div>
+            </div>
+
+            {/* Row 8 — Amount in Words + Grand Total */}
+            <div style={{ display: 'flex', borderTop: BORDER }}>
+              <div style={{ flex: 1, padding: '4px 10px', borderRight: BORDER, fontSize: 11 }}>
+                <strong>Amount in Words :</strong>&nbsp;<em>{totalWords}</em>
+              </div>
+              <div style={{ width: 152, padding: '4px 10px', display: 'flex', justifyContent: 'space-between', fontWeight: 700, fontSize: 12, background: '#f0f0f0' }}>
+                <span>Grand Total</span>
+                <span>₹ {fmtINR(outstanding)}</span>
+              </div>
+            </div>
+
+            {/* Row 9 — Terms & Conditions + Authorized Signatory */}
+            <div style={{ display: 'flex', borderTop: BORDER, minHeight: 72 }}>
+              <div style={{ flex: 1, padding: '6px 10px', borderRight: BORDER, fontSize: 10 }}>
+                <div style={{ fontWeight: 700, marginBottom: 4, fontSize: 11 }}>Terms &amp; Conditions :</div>
+                <ol style={{ margin: 0, paddingLeft: 16 }}>
+                  {TERMS.map((t, i) => <li key={i} style={{ marginBottom: 2 }}>{t}</li>)}
+                </ol>
+              </div>
+              <div style={{ width: 200, padding: '6px 10px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', fontSize: 11 }}>
+                <div style={{ textAlign: 'center', fontWeight: 600, fontSize: 11 }}>For ARP TankPro</div>
+                <div style={{ textAlign: 'center', borderTop: '1px solid #000', paddingTop: 4, fontSize: 10, marginTop: 30 }}>
+                  Authorized Signatory
+                </div>
+              </div>
+            </div>
+
+            {/* Row 10 — Footer strip */}
+            <div style={{ borderTop: BORDER, padding: '3px 10px', textAlign: 'center', fontSize: 9, color: '#555' }}>
+              This is a computer generated estimate. Generated by ARP TankPro ERP · {new Date().toLocaleString('en-IN')}
+            </div>
           </div>
         </div>
       </div>
@@ -268,7 +269,7 @@ export function InvoicePrintModal({ invoice, customer, products, onClose }: Invo
   );
 }
 
-// ── Simple amount-to-words (Indian style) ──────────────────────────────────
+// ── Indian amount-to-words ────────────────────────────────────────────────────
 function amountToWords(amount: number): string {
   const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine',
     'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
@@ -283,22 +284,19 @@ function amountToWords(amount: number): string {
 
   const rupees = Math.floor(amount);
   const paise = Math.round((amount - rupees) * 100);
-
   if (rupees === 0 && paise === 0) return 'Zero Rupees Only';
 
   let result = '';
-  if (rupees > 0) {
-    const crore = Math.floor(rupees / 10000000);
-    const lakh = Math.floor((rupees % 10000000) / 100000);
-    const thousand = Math.floor((rupees % 100000) / 1000);
-    const remaining = rupees % 1000;
+  const crore = Math.floor(rupees / 10000000);
+  const lakh = Math.floor((rupees % 10000000) / 100000);
+  const thousand = Math.floor((rupees % 100000) / 1000);
+  const remaining = rupees % 1000;
 
-    if (crore > 0) result += convertHundreds(crore) + 'Crore ';
-    if (lakh > 0) result += convertHundreds(lakh) + 'Lakh ';
-    if (thousand > 0) result += convertHundreds(thousand) + 'Thousand ';
-    if (remaining > 0) result += convertHundreds(remaining);
-    result = result.trim() + ' Rupees';
-  }
+  if (crore > 0) result += convertHundreds(crore) + 'Crore ';
+  if (lakh > 0) result += convertHundreds(lakh) + 'Lakh ';
+  if (thousand > 0) result += convertHundreds(thousand) + 'Thousand ';
+  if (remaining > 0) result += convertHundreds(remaining);
+  result = result.trim() + ' Rupees';
   if (paise > 0) result += ' and ' + convertHundreds(paise).trim() + ' Paise';
   return result + ' Only';
 }
