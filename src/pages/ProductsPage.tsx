@@ -5,7 +5,7 @@ import { Modal } from '../components/Modal';
 import { Plus, Edit2, Trash2, Package, Search, Loader2, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-const LAYER_TYPES = ['Single Layer', 'Double Layer', 'Triple Layer', 'Four Layer'] as const;
+const LAYER_TYPES = ['1', '2', '3', '4', '5'] as const;
 const STATUS_OPTIONS = ['Active', 'Inactive'] as const;
 
 export function ProductsPage() {
@@ -186,7 +186,7 @@ export function ProductsPage() {
                   <tr key={product.id} className="hover:bg-gray-50">
                     <td className="px-4 py-4 text-sm font-medium text-gray-900">{product.tank_name}</td>
                     <td className="px-4 py-4 text-sm text-gray-700">{product.capacity}</td>
-                    <td className="px-4 py-4 text-sm text-gray-700 hidden md:table-cell">{product.layer_type ?? '—'}</td>
+                    <td className="px-4 py-4 text-sm text-gray-700 hidden md:table-cell">{product.layer_type ? `${product.layer_type} Layer` : '—'}</td>
                     <td className="px-4 py-4 text-sm text-gray-700 hidden md:table-cell">{product.color ?? '—'}</td>
                     <td className="px-4 py-4 text-sm text-right text-gray-700 hidden lg:table-cell">
                       {product.purchase_rate != null ? `₹${Number(product.purchase_rate).toLocaleString('en-IN')}` : '—'}
@@ -269,7 +269,7 @@ export function ProductsPage() {
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">-- Select --</option>
-              {LAYER_TYPES.map(l => <option key={l} value={l}>{l}</option>)}
+              {LAYER_TYPES.map(l => <option key={l} value={l}>{l} Layer</option>)}
             </select>
           </div>
 
