@@ -5,7 +5,9 @@ import { Modal } from '../components/Modal';
 import { Plus, Edit2, Trash2, Package, Search, Loader2, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-const LAYER_TYPES = ['1', '2', '3', '4', '5'] as const;
+const TANK_NAMES = ['W', 'W Smart', 'P', 'P Smart'] as const;
+const CAPACITIES = ['500', '750', '1000', '1500', '2000', '3000', '5000'] as const;
+const LAYER_TYPES = ['1', '2', '3', '4', '5', '6', '7', '8'] as const;
 const STATUS_OPTIONS = ['Active', 'Inactive'] as const;
 
 export function ProductsPage() {
@@ -239,26 +241,28 @@ export function ProductsPage() {
             <label className="block text-sm font-medium text-gray-900 mb-2">
               Tank Name <span className="text-red-500">*</span>
             </label>
-            <input
-              type="text"
+            <select
               value={formData.tank_name || ''}
               onChange={(e) => setFormData({ ...formData, tank_name: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="e.g. ARP 500L Tank"
-            />
+            >
+              <option value="">-- Select --</option>
+              {TANK_NAMES.map(n => <option key={n} value={n}>{n}</option>)}
+            </select>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-900 mb-2">
               Capacity <span className="text-red-500">*</span>
             </label>
-            <input
-              type="text"
+            <select
               value={formData.capacity || ''}
               onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="e.g. 500 Litre"
-            />
+            >
+              <option value="">-- Select --</option>
+              {CAPACITIES.map(c => <option key={c} value={c}>{c} Ltr</option>)}
+            </select>
           </div>
 
           <div>
