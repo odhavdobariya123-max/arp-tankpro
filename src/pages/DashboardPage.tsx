@@ -108,7 +108,7 @@ export function DashboardPage() {
       }
     }
     const productMap: Record<string, string> = {};
-    for (const p of products) productMap[p.id] = p.name;
+    for (const p of products) productMap[p.id] = p.tank_name;
     return Object.values(map)
       .sort((a, b) => b.qty - a.qty)
       .slice(0, 10)
