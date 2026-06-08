@@ -129,26 +129,7 @@ export function InvoicePrintModal({ invoice, customer, products, onClose }: Invo
               ))}
             </div>
 
-            {/* Row 3 — Company Header (from Settings) */}
-            <div style={{ borderBottom: BORDER, padding: '6px 10px', display: 'flex', alignItems: 'center', gap: 12 }}>
-              {companyLogo && (
-                <img src={companyLogo} alt="Logo" style={{ width: 52, height: 52, objectFit: 'contain' }} />
-              )}
-              <div style={{ flex: 1, textAlign: 'center' }}>
-                <div style={{ fontSize: 18, fontWeight: 700, letterSpacing: 1 }}>{companyName}</div>
-                {brandName && <div style={{ fontSize: 11, marginTop: 2 }}>{brandName}</div>}
-                <div style={{ fontSize: 10, marginTop: 2, color: '#333' }}>
-                  {companyAddress}
-                  {companyMobile !== '—' && <span> &nbsp;|&nbsp; Ph: {companyMobile}</span>}
-                  {companyEmail !== '—' && <span> &nbsp;|&nbsp; {companyEmail}</span>}
-                </div>
-                {companyGST !== '—' && (
-                  <div style={{ fontSize: 10, marginTop: 2, fontWeight: 600 }}>GSTIN: {companyGST}</div>
-                )}
-              </div>
-            </div>
-
-            {/* Row 4 — M/s + Invoice No/Date */}
+            {/* Row 3 — M/s + Invoice No/Date */}
             <div style={{ display: 'flex', borderBottom: BORDER, minHeight: 72 }}>
               <div style={{ flex: 1, padding: '6px 10px', borderRight: BORDER }}>
                 <div style={{ fontSize: 10, color: '#555', marginBottom: 2 }}>M/s :</div>
