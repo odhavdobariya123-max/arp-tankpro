@@ -134,21 +134,70 @@ export function DashboardPage() {
   };
 
   return (
-    <div className="p-4 md:p-6 space-y-6">
+    <div className="p-4 md:p-6 space-y-6 bg-blue-50 min-h-screen">
 
       {/* ── Page Header ──────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Management Dashboard</h1>
-          <p className="text-gray-500 text-sm mt-1">Live data from Supabase · {new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</p>
-        </div>
-        <button
-          onClick={refreshAll}
-          className="flex items-center gap-2 bg-white border border-gray-200 text-gray-600 px-4 py-2 rounded-lg hover:bg-gray-50 transition text-sm shadow-sm"
-        >
-          <RefreshCw size={15} /> Refresh All
-        </button>
+    
+<div className="bg-white rounded-2xl shadow-sm p-4 md:p-6">
+  <div className="flex items-center justify-between">
+    <div>
+      <h1 className="text-2xl md:text-4xl font-bold text-gray-900">
+        AKSHAR ROTO PLAST
+      </h1>
+      <p className="text-sm text-gray-500 mt-1">
+        ARP TankPro ERP
+      </p>
+    </div>
+  
+
+    
+
+    <button
+      onClick={refreshAll}
+      className="w-11 h-11 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center"
+    >
+      <RefreshCw size={20} />
+    </button>
+  </div>
+</div>
+    
+{/* Quick Links */}
+<div className="bg-white rounded-2xl shadow-sm p-4">
+  <h2 className="text-lg font-semibold text-gray-800 mb-4">
+    Quick Links
+  </h2>
+
+  <div className="grid grid-cols-4 gap-4 text-center">
+    <button className="flex flex-col items-center gap-2">
+      <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
+        📦
       </div>
+      <span className="text-xs">Products</span>
+    </button>
+
+    <button className="flex flex-col items-center gap-2">
+      <div className="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center">
+        💰
+      </div>
+      <span className="text-xs">Sales</span>
+    </button>
+
+    <button className="flex flex-col items-center gap-2">
+      <div className="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center">
+        🏭
+      </div>
+      <span className="text-xs">Production</span>
+    </button>
+
+    <button className="flex flex-col items-center gap-2">
+      <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center">
+        📊
+      </div>
+      <span className="text-xs">Reports</span>
+    </button>
+  </div>
+</div>
+    
 
       {/* ── KPI Row 1 ────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
