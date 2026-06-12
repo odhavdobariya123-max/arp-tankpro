@@ -165,29 +165,29 @@ export function StockPage() {
 
       {/* Header */}
       <div className="mb-8">
-        <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+        <div className="flex flex-col md:flex-row gap-4 md:items-center md:justify-between mb-6">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 flex items-center gap-3">
             <Warehouse className="text-blue-600" size={32} />
             Stock Management
           </h1>
-          <div className="flex gap-3 flex-wrap">
+          <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
             <button
               onClick={() => openModal('IN')}
-              className="bg-green-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-green-700 transition text-sm"
+              className="bg-green-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-green-700 transition text-smw-full md:w-auto"
             >
               <Plus size={18} />
               Stock In
             </button>
             <button
               onClick={() => openModal('OUT')}
-              className="bg-red-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-red-700 transition text-sm"
+              className="bg-red-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-red-700 transition text-smw-full md:w-auto"
             >
               <Minus size={18} />
               Stock Out
             </button>
             <button
               onClick={fetchTransactions}
-              className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-gray-200 transition text-sm"
+              className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-gray-200 transition text-smw-full md:w-auto"
             >
               <RefreshCw size={16} />
               Refresh
@@ -195,8 +195,8 @@ export function StockPage() {
           </div>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+       {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
           <div className="bg-white p-5 rounded-lg shadow border-l-4 border-blue-600">
             <p className="text-gray-500 text-xs font-medium uppercase">Total Products</p>
             <p className="text-2xl font-bold text-gray-900 mt-1">{allProductsWithStock.length}</p>
@@ -232,7 +232,7 @@ export function StockPage() {
                 {item.name}: <strong>{item.current_stock}</strong>
               </span>
             ))}
-          </div>
+          </div> 
         </div>
       )}
 
@@ -313,9 +313,64 @@ export function StockPage() {
           </table>
         </div>
       </div>
+{/* Mobile Stock History Cards */}
+<div className="md:hidden space-y-3 mb-6">
+  {filteredHistory.length === 0 ? (
+    <div className="bg-white rounded-xl shadow-sm p-6 text-center text-gray-500 border border-gray-200">
+      No transactions yet. Use Stock In / Stock Out to record movements.
+    </div>
+  ) : (
+    filteredHistory.map((tx) => (
+      <div key={tx.id} className="bg-white rounded-xl shadow-sm p-4 border border-gray-200">
+        <div className="flex justify-between gap-3">
+          <div>
+            <h3 className="font-bold text-gray-900">
+              {productMap[tx.product_id] ?? tx.product_id}
+            </h3>
+            <p className="text-xs text-gray-500">
+              {new Date(tx.created_at).toLocaleString('en-IN', {
+                dateStyle: 'short',
+                timeStyle: 'short',
+              })}
+            </p>
+          </div>
 
+          {tx.transaction_type === 'IN' ? (
+            <span className="h-fit inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+              <ArrowUpCircle size={12} /> IN
+            </span>
+          ) : (
+            <span className="h-fit inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
+              <ArrowDownCircle size={12} /> OUT
+            </span>
+          )}
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 mt-4">
+          <div className="bg-gray-50 rounded-lg p-3">
+            <p className="text-xs text-gray-500">Reference</p>
+            <p className="font-semibold text-gray-800">
+              {tx.reference_type ?? '—'}
+            </p>
+          </div>
+
+          <div className="bg-blue-50 rounded-lg p-3">
+            <p className="text-xs text-gray-500">Quantity</p>
+            <p className={`font-bold ${tx.transaction_type === 'IN' ? 'text-green-600' : 'text-red-500'}`}>
+              {tx.transaction_type === 'IN' ? '+' : '-'}{tx.quantity}
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-3 text-sm text-gray-500">
+          {tx.notes ?? 'No Notes'}
+        </div>
+      </div>
+    ))
+  )}
+</div>
       {/* Stock History */}
-      <div className="bg-white rounded-lg shadow overflow-hidden mb-6">
+      <div className="hidden md:block bg-white rounded-lg shadow overflow-hidden mb-6">
         <div className="px-6 py-4 border-b border-gray-200 flex items-center gap-2">
           <RefreshCw size={18} className="text-blue-600" />
           <h2 className="font-semibold text-gray-800">Stock History</h2>

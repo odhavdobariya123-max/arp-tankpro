@@ -49,11 +49,11 @@ export function ProductsPage() {
       const payload = {
         tank_name: formData.tank_name!,
         capacity: formData.capacity!,
-        layer_type: formData.layer_type || null,
-        color: formData.color || null,
-        weight: formData.weight ? Number(formData.weight) : null,
-        purchase_rate: formData.purchase_rate ? Number(formData.purchase_rate) : null,
-        sale_rate: formData.sale_rate ? Number(formData.sale_rate) : null,
+        layer_type: formData.layer_type || undefined,
+        color: formData.color || undefined,
+        weight: formData.weight ? Number(formData.weight) : undefined,
+        purchase_rate: formData.purchase_rate ? Number(formData.purchase_rate) : undefined,
+        sale_rate: formData.sale_rate ? Number(formData.sale_rate) : undefined,
         status: formData.status || 'Active',
       };
 
@@ -108,14 +108,14 @@ export function ProductsPage() {
 
       {/* Header */}
       <div className="mb-8">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-col md:flex-row gap-4 md:items-center md:justify-between mb-6">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 flex items-center gap-3">
             <Package className="text-blue-600" size={32} />
             Products / Tanks
           </h1>
           <button
             onClick={() => handleOpenModal()}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700 transition text-sm md:text-base"
+            className="bg-blue-600 text-white px-4 py-3 rounded-lg flex items-center justify-center gap-2 hover:bg-blue-700 transition text-sm md:text-base w-full md:w-auto"
           >
             <Plus size={18} />
             Add Product
@@ -159,9 +159,70 @@ export function ProductsPage() {
         <div>Rows Fetched: {products.length}</div>
         <div>Last Error: {error ?? 'none'}</div>
       </div>
+{/* Mobile Product Cards */}
+<div className="md:hidden space-y-3 mb-4">
+  {filteredProducts.length === 0 ? (
+    <div className="bg-white rounded-xl shadow p-6 text-center text-gray-500">
+      {products.length === 0 ? '0 Products' : 'No products match your search'}
+    </div>
+  ) : (
+    filteredProducts.map((product) => (
+      <div key={product.id} className="bg-white rounded-xl shadow-sm p-4 border border-gray-200">
+        <div className="flex justify-between gap-3">
+          <div>
+            <h3 className="font-bold text-gray-900">
+              {product.tank_name} - {product.capacity}
+            </h3>
+            <p className="text-sm text-gray-500">
+              {product.layer_type ?? 'No Layer'} • {product.color ?? 'No Color'}
+            </p>
+          </div>
 
+          <span className={`h-fit px-2 py-1 rounded-full text-xs font-medium ${
+            product.status === 'Active'
+              ? 'bg-green-100 text-green-700'
+              : 'bg-gray-100 text-gray-600'
+          }`}>
+            {product.status}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 mt-4">
+          <div className="bg-gray-50 rounded-lg p-3">
+            <p className="text-xs text-gray-500">Purchase</p>
+            <p className="font-bold text-gray-900">
+              {product.purchase_rate != null ? `₹${Number(product.purchase_rate).toLocaleString('en-IN')}` : '—'}
+            </p>
+          </div>
+
+          <div className="bg-blue-50 rounded-lg p-3">
+            <p className="text-xs text-gray-500">Sale</p>
+            <p className="font-bold text-blue-700">
+              {product.sale_rate != null ? `₹${Number(product.sale_rate).toLocaleString('en-IN')}` : '—'}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex gap-2 mt-4">
+          <button
+            onClick={() => handleOpenModal(product)}
+            className="flex-1 py-2 bg-blue-50 text-blue-600 rounded-lg"
+          >
+            Edit
+          </button>
+          <button
+            onClick={() => handleDelete(product.id)}
+            className="flex-1 py-2 bg-red-50 text-red-600 rounded-lg"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    ))
+  )}
+</div>
       {/* Table */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="hidden md:block bg-white rounded-lg shadow overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">

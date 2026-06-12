@@ -151,7 +151,7 @@ export function DashboardPage() {
       </div>
 
       {/* ── KPI Row 1 ────────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
         {statsRow1.map((stat, idx) => {
           const Icon = stat.icon;
           return (

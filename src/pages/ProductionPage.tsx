@@ -154,22 +154,22 @@ export function ProductionPage() {
 
       {/* Header */}
       <div className="mb-8">
-        <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+        <div className="flex flex-col md:flex-row gap-4 md:items-center md:justify-between mb-6">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 flex items-center gap-3">
             <Factory className="text-blue-600" size={32} />
             Production Entry
           </h1>
-          <div className="flex gap-3">
+          <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
             <button
               onClick={() => { setForm(defaultForm()); setIsModalOpen(true); }}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700 transition text-sm"
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700 transition text-sm w-full md:w-auto"
             >
               <Plus size={18} />
               New Entry
             </button>
             <button
               onClick={async () => { await fetchEntries(); await fetchTransactions(); }}
-              className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-gray-200 transition text-sm"
+              className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-gray-200 transition text-sm w-full md:w-auto"
             >
               <RefreshCw size={16} />
               Refresh
@@ -178,7 +178,7 @@ export function ProductionPage() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-white p-5 rounded-lg shadow border-l-4 border-blue-600">
             <p className="text-gray-500 text-xs font-medium uppercase">Total Entries</p>
             <p className="text-2xl font-bold text-gray-900 mt-1">{entries.length}</p>
@@ -217,9 +217,52 @@ export function ProductionPage() {
           />
         </div>
       </div>
+{/* Mobile Production Cards */}
+<div className="md:hidden space-y-3 mb-6">
+  {filteredEntries.map((entry) => (
+    <div key={entry.id} className="bg-white rounded-xl shadow-sm p-4 border border-gray-200">
+      <div className="flex justify-between items-start">
+        <div>
+          <h3 className="font-bold text-gray-900">
+            {productMap[entry.product_id] ?? entry.product_id}
+          </h3>
+          <p className="text-sm text-gray-500">
+            {entry.production_date}
+          </p>
+        </div>
 
+        <span className="font-bold text-green-700 text-lg">
+          +{entry.quantity}
+        </span>
+      </div>
+
+      <div className="mt-3 text-sm text-gray-600">
+        {entry.notes ?? 'No Notes'}
+      </div>
+
+      <div className="flex gap-2 mt-4">
+        <div className="flex-1 bg-green-50 text-green-700 text-center py-2 rounded-lg text-sm">
+          Stock Added
+        </div>
+
+        <button
+          onClick={() =>
+            handleDelete(
+              entry.id,
+              entry.stock_transaction_id,
+              productMap[entry.product_id] ?? entry.product_id
+            )
+          }
+          className="flex-1 bg-red-50 text-red-600 py-2 rounded-lg text-sm"
+        >
+          Delete
+        </button>
+      </div>
+    </div>
+  ))}
+</div>
       {/* Production Entries Table */}
-      <div className="bg-white rounded-lg shadow overflow-hidden mb-6">
+      <div className="hidden md:block bg-white rounded-lg shadow overflow-hidden mb-6">
         <div className="px-6 py-4 border-b border-gray-200 flex items-center gap-2">
           <CalendarDays size={18} className="text-blue-600" />
           <h2 className="font-semibold text-gray-800">Production Records</h2>

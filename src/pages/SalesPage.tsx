@@ -229,21 +229,21 @@ export function SalesPage() {
 
       {/* Header */}
       <div className="mb-8">
-        <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+        <div className="flex flex-col md:flex-row gap-4 md:items-center md:justify-between mb-6">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 flex items-center gap-3">
             <ShoppingCart className="text-blue-600" size={32} />
             Sales Invoices
           </h1>
-          <div className="flex gap-3 flex-wrap">
+          <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
             <button
               onClick={openNew}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700 transition text-sm"
+              className="bg-blue-600 text-white px-4 py-3 rounded-lg flex items-center justify-center gap-2 hover:bg-blue-700 transition text-sm w-full md:w-auto"
             >
               <Plus size={18} /> New Invoice
             </button>
             <button
               onClick={async () => { await fetchInvoices(); await fetchTransactions(); }}
-              className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-gray-200 transition text-sm"
+              className="bg-gray-100 text-gray-700 px-4 py-3 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-200 transition text-sm w-full md:w-auto"
             >
               <RefreshCw size={16} /> Refresh
             </button>
@@ -251,7 +251,7 @@ export function SalesPage() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <div className="bg-white p-5 rounded-lg shadow border-l-4 border-blue-600">
             <p className="text-gray-500 text-xs font-medium uppercase">Total Sales</p>
             <p className="text-2xl font-bold text-blue-700 mt-1">₹{totalSales.toLocaleString('en-IN')}</p>
@@ -282,9 +282,72 @@ export function SalesPage() {
           />
         </div>
       </div>
+{/* Mobile Invoice Cards */}
+<div className="md:hidden space-y-3 mb-6">
+  {filtered.length === 0 ? (
+    <div className="bg-white rounded-xl shadow p-6 text-center text-gray-500">
+      No invoices found
+    </div>
+  ) : (
+    filtered.map((inv) => (
+      <div key={inv.id} className="bg-white rounded-xl shadow p-4 border">
+        <div className="flex justify-between items-start">
+          <div>
+            <h3 className="font-bold text-blue-700">
+              {inv.invoice_no}
+            </h3>
+            <p className="text-sm text-gray-500">
+              {customerMap[inv.customer_id] ?? '—'}
+            </p>
+            <p className="text-xs text-gray-400">
+              {inv.invoice_date}
+            </p>
+          </div>
 
+          <div className="text-right">
+            <p className="font-bold text-gray-900">
+              ₹{Number(inv.total_amount).toLocaleString('en-IN')}
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 mt-4">
+          <div className="bg-green-50 rounded-lg p-3">
+            <p className="text-xs text-gray-500">Paid</p>
+            <p className="font-bold text-green-700">
+              ₹{Number(inv.paid_amount).toLocaleString('en-IN')}
+            </p>
+          </div>
+
+          <div className="bg-orange-50 rounded-lg p-3">
+            <p className="text-xs text-gray-500">Outstanding</p>
+            <p className="font-bold text-orange-700">
+              ₹{Number(inv.outstanding_amount).toLocaleString('en-IN')}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex gap-2 mt-4">
+          <button
+            onClick={() => setPrintInvoiceId(inv.id)}
+            className="flex-1 py-2 bg-blue-50 text-blue-600 rounded-lg"
+          >
+            View
+          </button>
+
+          <button
+            onClick={() => handleDelete(inv)}
+            className="flex-1 py-2 bg-red-50 text-red-600 rounded-lg"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    ))
+  )}
+</div>
       {/* Invoice Table */}
-      <div className="bg-white rounded-lg shadow overflow-hidden mb-6">
+      <div className="hidden md:block bg-white rounded-lg shadow overflow-hidden mb-6">
         <div className="px-6 py-4 border-b border-gray-200 flex items-center gap-2">
           <FileText size={18} className="text-blue-600" />
           <h2 className="font-semibold text-gray-800">Invoice List</h2>

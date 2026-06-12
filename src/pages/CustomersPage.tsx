@@ -58,26 +58,26 @@ export function CustomersPage() {
         await updateCustomer(editingCustomer.id, {
           name: formData.name,
           mobile: formData.mobile,
-          gst_number: formData.gst_number || null,
+          gst_number: formData.gst_number || undefined,
           address: formData.address,
           city: formData.city,
           dealer_type: formData.dealer_type!,
           opening_balance: Number(formData.opening_balance) || 0,
           current_outstanding: Number(formData.current_outstanding) || 0,
-          notes: formData.notes || null,
+          notes: formData.notes || undefined,
         });
         toast.success('Customer updated');
       } else {
         await addCustomer({
           name: formData.name!,
           mobile: formData.mobile!,
-          gst_number: formData.gst_number || null,
+          gst_number: formData.gst_number || undefined,
           address: formData.address!,
           city: formData.city!,
           dealer_type: formData.dealer_type!,
           opening_balance: Number(formData.opening_balance) || 0,
           current_outstanding: Number(formData.current_outstanding) || 0,
-          notes: formData.notes || null,
+          notes: formData.notes || undefined,
         });
         toast.success('Customer added');
       }
@@ -176,9 +176,53 @@ export function CustomersPage() {
         <div>Rows fetched: {customers.length}</div>
         <div>Last error: {error ?? 'none'}</div>
       </div>
+{/* Mobile Customer Cards */}
+<div className="md:hidden space-y-3 mb-4">
+  {filteredCustomers.length === 0 ? (
+    <div className="bg-white rounded-xl shadow p-6 text-center text-gray-500">
+      No customers found
+    </div>
+  ) : (
+    filteredCustomers.map((customer) => (
+      <div key={customer.id} className="bg-white rounded-xl shadow p-4 border">
+        <div className="flex justify-between gap-3">
+          <div>
+            <h3 className="font-bold text-gray-900">{customer.name}</h3>
+            <p className="text-sm text-gray-500">{customer.mobile}</p>
+            <p className="text-sm text-gray-500">{customer.city}</p>
+          </div>
+          <span className="h-fit px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-700">
+            {customer.dealer_type}
+          </span>
+        </div>
 
+        <div className="mt-3">
+          <p className="text-xs text-gray-500">Outstanding</p>
+          <p className="font-bold text-red-600">
+            ₹{Number(customer.current_outstanding).toLocaleString('en-IN')}
+          </p>
+        </div>
+
+        <div className="flex gap-2 mt-4">
+          <button
+            onClick={() => handleOpenModal(customer)}
+            className="flex-1 py-2 bg-blue-50 text-blue-600 rounded-lg"
+          >
+            Edit
+          </button>
+          <button
+            onClick={() => handleDeleteCustomer(customer.id)}
+            className="flex-1 py-2 bg-red-50 text-red-600 rounded-lg"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    ))
+  )}
+</div>
       {/* Table */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="hidden md:blockbg-white rounded-lg shadow overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">

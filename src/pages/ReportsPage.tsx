@@ -253,7 +253,7 @@ export function ReportsPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex flex-wrap gap-2 mb-6 no-print">
+      <div className="grid grid-cols-2 md:flex gap-2 mb-6 no-print">
         {TABS.map(tab => {
           const Icon = tab.icon;
           return (
@@ -292,7 +292,7 @@ export function ReportsPage() {
             <ReportHeader title="Sales Report" icon={FileText} onPrint={handlePrint} onCSV={handleSalesCSV} />
             <DateFilter from={sFrom} to={sTo} setFrom={setSFrom} setTo={setSTo} />
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
               <StatCard label="Invoices"      value={String(filteredSales.length)}       color="border-blue-600" />
               <StatCard label="Total Sales"   value={fmtINR(salesTotal)}                color="border-blue-500" />
               <StatCard label="Total Paid"    value={fmtINR(salesPaid)}                 color="border-green-600" />
@@ -358,7 +358,7 @@ export function ReportsPage() {
               <StatCard label="Low Stock (≤5)" value={`${lowStockCount} items`} color={lowStockCount > 0 ? 'border-red-500' : 'border-green-500'} />
             </div>
 
-            <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="bg-white rounded-lg shadow overflow-x-auto">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead className="bg-gray-50 border-b border-gray-200">
